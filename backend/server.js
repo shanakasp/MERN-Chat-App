@@ -1,9 +1,11 @@
 // Import required modules
 const express = require("express");
 const { chats } = require("./data/data");
+const dotenv = require("dotenv");
 
 // Create an instance of Express
 const app = express();
+dotenv.config();
 
 // Middleware to log request path
 app.use((req, res, next) => {
@@ -21,8 +23,14 @@ app.get("/api/chat", (req, res) => {
   res.send(chats);
 });
 
-// Start the server
-const port = process.env.PORT || 5000;
+app.get("/api/chat/:id", (req, res) => {
+  console.log(req.params.id);
+  const singleChat = chats.find((c) => c._id === req.params.id);
+  res.send(singleChat);
+});
+
+const port = process.env.PORT;
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
