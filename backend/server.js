@@ -1,5 +1,6 @@
 // Import required modules
 const express = require("express");
+const cors = require("cors"); // Import cors module
 const { chats } = require("./data/data");
 const dotenv = require("dotenv");
 
@@ -13,8 +14,10 @@ app.use((req, res, next) => {
   next(); // Call the next middleware function in the stack
 });
 
-// Define a route
+// Enable CORS for all routes
+app.use(cors());
 
+// Define a route
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
