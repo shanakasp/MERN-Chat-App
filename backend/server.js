@@ -3,10 +3,12 @@ const express = require("express");
 const cors = require("cors"); // Import cors module
 const { chats } = require("./data/data");
 const dotenv = require("dotenv");
+const connectdb = require("./config/db");
 
 // Create an instance of Express
 const app = express();
 dotenv.config();
+connectdb();
 
 // Middleware to log request path
 app.use((req, res, next) => {
