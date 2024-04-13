@@ -1,11 +1,7 @@
-// Sample user data
-let users = [
-  { id: 1, name: "John" },
-  { id: 2, name: "Alice" },
-  { id: 3, name: "Bob" },
-];
-
 const generateToken = require("../config/generateToken");
+const User = require("../model/userModel");
+const bcrypt = require("bcryptjs");
+
 // Function to get all users
 const getAllUsers = async (req, res) => {
   res.json(users);
@@ -34,7 +30,16 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const user = await User.create({ name, email, password, pic });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10); // Salt rounds: 10
+
+    // Create new user with hashed password
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      pic,
+    });
 
     if (user) {
       res.status(201).json({
@@ -42,6 +47,7 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         pic: user.pic,
+
         token: generateToken(user._id),
       });
     } else {
@@ -52,6 +58,43 @@ const registerUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+const authUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    // Check if user exists
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Generate JWT token
+    const token = generateToken(user._id);
+
+    // Return user data and token
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      pic: user.pic,
+      token,
+    });
+  } catch (error) {
+    console.error("Error authenticating user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = authUser;
 
 // Function to update an existing user
 const updateUser = async (req, res) => {
@@ -82,6 +125,7 @@ const deleteUser = async (req, res) => {
 module.exports = {
   getAllUsers,
   getUserById,
+  authUser,
   registerUser,
   updateUser,
   deleteUser,
