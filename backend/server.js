@@ -7,6 +7,8 @@ const connectdb = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 // Create an instance of Express
 const app = express();
+app.use(express.json());
+
 dotenv.config();
 connectdb();
 

@@ -5,6 +5,7 @@ let users = [
   { id: 3, name: "Bob" },
 ];
 
+const generateToken = require("../config/generateToken");
 // Function to get all users
 const getAllUsers = async (req, res) => {
   res.json(users);
